@@ -22,13 +22,7 @@ export default defineConfig({
       clientPort: 3000,
     },
     port: 3000,
-    proxy: {
-      '/promendoza/': {
-        target: 'http://172.31.25.66:8080',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/promendoza/, '')
-      }
-    }
+
   },
   build: {
     outDir: 'dist',

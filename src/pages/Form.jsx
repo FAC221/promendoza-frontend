@@ -12,7 +12,7 @@ const Form = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("/promendoza/api/form", {
+      const response = await fetch("https://promendoza.equilybrio-dev.ar/promendoza/api/form", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

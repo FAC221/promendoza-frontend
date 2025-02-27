@@ -1,39 +1,42 @@
 import React, { useState, useEffect } from "react";
 import "./styles/EstablishmentForm.css"; // Importamos el archivo CSS separado
+import countriesData from '../data/countriesData'
 
 const EstablishmentForm = ({ data, onChange }) => {
-  const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
-
-  // Obtener países y estados del backend
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const response = await fetch("/promendoza/api/form/countries");
-        const result = await response.json();
-        if (result.success) {
-          setCountries(result.data);
-        } else {
-          console.error("Error al obtener países:", result.message);
-        }
-      } catch (error) {
-        console.error("Error al conectarse al backend:", error);
-      }
-    };
-
-    fetchCountries();
-  }, []);
+  
+  // Convertir el objeto de países a un array ordenado alfabéticamente
+  const countries = Object.values(countriesData)
+    .map(country => ({
+      nombre: country.nombre,
+      codigo: country.codigo
+    }))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
 
   // Manejar el cambio de país y actualizar los estados
-  const handleCountryChange = (country) => {
-    const selectedCountry = countries.find(
-      (c) => c.country.trim().toLowerCase() === country.trim().toLowerCase()
-    );
-
-    setStates(selectedCountry ? selectedCountry.states : []);
-    onChange("country", selectedCountry ? selectedCountry.country : country);
-    onChange("state", ""); // Limpiar el estado/provincia seleccionado
+  const handleCountryChange = (selectedCountry) => {
+    const countryData = countriesData[selectedCountry];
+    if (countryData) {
+      // Ordenar los estados alfabéticamente
+      setStates(countryData.estados.sort((a, b) => a.localeCompare(b, 'es')));
+      onChange("country", selectedCountry);
+      onChange("state", ""); // Limpiar el estado seleccionado
+    } else {
+      setStates([]);
+      onChange("country", selectedCountry);
+      onChange("state", "");
+    }
   };
+
+  // Actualizar estados cuando se monta el componente si hay un país seleccionado
+  useEffect(() => {
+    if (data.country) {
+      const countryData = countriesData[data.country];
+      if (countryData) {
+        setStates(countryData.estados);
+      }
+    }
+  }, [data.country]);
 
   return (
     <div className="establishment-form-container">
@@ -49,15 +52,15 @@ const EstablishmentForm = ({ data, onChange }) => {
           >
             <option value="">Seleccione</option>
             {countries.map((country) => (
-              <option key={country.country} value={country.country}>
-                {country.country}
+              <option key={country.codigo} value={country.nombre}>
+                {country.nombre}
               </option>
             ))}
           </select>
         </div>
 
         <div className="establishment-form-group">
-          <label className="establishment-form-label">Estado</label>
+          <label className="establishment-form-label">Estado/Provincia</label>
           <select
             name="state"
             value={data.state || ""}
